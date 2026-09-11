@@ -18,7 +18,8 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p assets
-          cat assets/resume/000a.txt assets/resume/000b.txt assets/resume/00b.txt \
+          cat assets/resume/p0.txt assets/resume/p1.txt assets/resume/p2.txt assets/resume/p3.txt assets/resume/p4.txt \
+              assets/resume/000b.txt assets/resume/00b.txt \
               assets/resume/01.txt assets/resume/02.txt assets/resume/03.txt assets/resume/04.txt \
               assets/resume/05.txt assets/resume/06.txt assets/resume/07.txt assets/resume/08.txt \
               assets/resume/09.txt assets/resume/10.txt assets/resume/11.txt > /tmp/resume.b64
