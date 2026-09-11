@@ -18,7 +18,24 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p assets
-          cat assets/resume/p0.txt assets/resume/p1.txt assets/resume/p2.txt assets/resume/p3.txt assets/resume/p4.txt \
+          python3 - <<'PY'
+          import hashlib, pathlib
+          src=pathlib.Path('assets/resume/p0.txt').read_bytes()
+          target='074be000353ecce48bc4fde2590a317f20cfc8c8'
+          def gitsha(b):
+              return hashlib.sha1(b'blob '+str(len(b)).encode()+b'\0'+b).hexdigest()
+          fixed=None
+          for i in range(len(src)-7):
+              c=src[:i]+src[i+8:]
+              if len(c)==1000 and gitsha(c)==target:
+                  fixed=c
+                  break
+          if fixed is None:
+              raise SystemExit('Could not repair first resume prefix chunk')
+          pathlib.Path('/tmp/p0.txt').write_bytes(fixed)
+          print('Verified first 1000 base64 characters')
+          PY
+          cat /tmp/p0.txt assets/resume/p1.txt assets/resume/p2.txt assets/resume/p3.txt assets/resume/p4.txt \
               assets/resume/000b.txt assets/resume/00b.txt \
               assets/resume/01.txt assets/resume/02.txt assets/resume/03.txt assets/resume/04.txt \
               assets/resume/05.txt assets/resume/06.txt assets/resume/07.txt assets/resume/08.txt \
