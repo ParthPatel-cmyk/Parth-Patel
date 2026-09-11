@@ -1,1 +1,0 @@
-This portfolio's resume is the PDF provided by Parth Patel on September 10, 2026. The live resume button opens resume.html, which mirrors the attached resume content.
