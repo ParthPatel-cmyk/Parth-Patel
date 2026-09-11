@@ -17,49 +17,15 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 - <<'PY'
-          import base64, hashlib, pathlib
-          root = pathlib.Path('.')
-          files = [root / 'assets/resume/00.txt'] + [root / f'assets/resume/{i:02d}.txt' for i in range(1,12)]
-          chunks=[]
-          for p in files:
-              s=''.join(p.read_text().split())
-              chunks.append(s)
-          full=''.join(chunks)
-          expected_size=125389
-          expected_hash='6fcc1351088bea31afb06d0ceeb0f39eb9418629308bfee9ce4be74701623117'
-          boundaries=[]
-          n=0
-          for c in chunks[:-1]:
-              n += len(c)
-              boundaries.append(n)
-          candidates={0, len(full)-12}
-          for b in boundaries:
-              for off in range(-64,65):
-                  pos=b+off
-                  if 0 <= pos <= len(full)-12:
-                      candidates.add(pos)
-          found=None
-          for pos in sorted(candidates):
-              candidate=full[:pos]+full[pos+12:]
-              if len(candidate) != 167188:
-                  continue
-              try:
-                  data=base64.b64decode(candidate, validate=True)
-              except Exception:
-                  continue
-              if len(data)==expected_size and hashlib.sha256(data).hexdigest()==expected_hash:
-                  found=(pos,data)
-                  break
-          if not found:
-              raise SystemExit('Could not reconstruct exact uploaded resume from staging chunks')
-          pos,data=found
-          print(f'Found duplicated 12-character overlap at base64 position {pos}')
-          out=root/'assets/parth-patel-resume.pdf'
-          out.write_bytes(data)
-          print(f'PDF_SIZE={len(data)}')
-          print(f'PDF_SHA256={hashlib.sha256(data).hexdigest()}')
-          PY
+          mkdir -p assets
+          cat assets/resume/000a.txt assets/resume/000b.txt assets/resume/00b.txt \
+              assets/resume/01.txt assets/resume/02.txt assets/resume/03.txt assets/resume/04.txt \
+              assets/resume/05.txt assets/resume/06.txt assets/resume/07.txt assets/resume/08.txt \
+              assets/resume/09.txt assets/resume/10.txt assets/resume/11.txt > /tmp/resume.b64
+          test "$(wc -c < /tmp/resume.b64)" -eq 167188
+          base64 --decode /tmp/resume.b64 > assets/parth-patel-resume.pdf
+          test "$(wc -c < assets/parth-patel-resume.pdf)" -eq 125389
+          echo "6fcc1351088bea31afb06d0ceeb0f39eb9418629308bfee9ce4be74701623117  assets/parth-patel-resume.pdf" | sha256sum -c -
           rm -rf assets/resume
           rm -f resume.html resume-source.txt
           rm -f .github/workflows/materialize-resume.yml
